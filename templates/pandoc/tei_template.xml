@@ -1,0 +1,24 @@
+<templates/pandoc/tei_template.xml>
+<?xml version="1.0" encoding="UTF-8"?>
+<TEI xmlns="http://www.tei-c.org/ns/1.0">
+    <teiHeader>
+        <fileDesc>
+            <titleStmt>
+                <title>Title of the 19th-century German Academic Book</title>
+                <author>Author Name</author>
+            </titleStmt>
+            <publicationStmt>
+                <publisher>Publisher Name</publisher>
+                <date>Year of Publication</date>
+            </publicationStmt>
+            <sourceDesc>
+                <p>Original HTML file converted to TEI XML.</p>
+            </sourceDesc>
+        </fileDesc>
+    </teiHeader>
+    <text>
+        <body>
+            <!-- Content will be inserted here during conversion -->
+        </body>
+    </text>
+</TEI>
