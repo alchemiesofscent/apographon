@@ -19,17 +19,23 @@ pip install -r requirements.txt  # includes beautifulsoup4
    ```
    The converter detects paragraph language, column footnotes, and emits JSON conforming to `data/sample.json`.
 
-2. **Run the offline translation agent**
+2. **Trim to the first 15 pages for each batch**
    ```bash
-   python scripts/translation_pipeline.py data/documents/wellmann.json data/vetted/wellmann-auto.json
+   jq '{document, paragraphs: (.paragraphs | map(select(.page <= 15)))}' \
+     data/documents/wellmann.json > data/documents/wellmann_p1_15.json
    ```
-   This populates English translations, confidence scores, vetting notes, and ISO8601 timestamps. All translations remain in English—no transliteration is generated or displayed.
+   Feed the `_p1_15.json` artifact into the translator.
 
-3. **Review in the vetting console**
+3. **Drive translations with the LLM orchestrator**
+   - Follow `prompts/translator_orchestrator.md` inside the Codex CLI to spawn language agents, run improve passes, and append observations to `glossaries/<lang>_glossary.jsonl`.
+   - After the batch, run `make glossary-compact` so compiled and decision files refresh for the next pass.
+   - Subsequent runs should load `glossaries/<lang>_decisions.json` as `glossary_json` (or `{}` if absent).
+
+4. **Review in the vetting console**
    - Open `vetting.html` locally, load a JSON file, and step through each paragraph.
    - Approve, flag (requires notes), or skip; export the vetted file and place it under `data/vetted/`.
 
-4. **Publish to GitHub Pages**
+5. **Publish to GitHub Pages**
    - Commit vetted JSON under `data/vetted/` and deploy.
    - `viewer.html` reads from `data/sample.json` by default—swap the URL or wire a simple index if you host multiple works.
 
@@ -47,7 +53,7 @@ pip install -r requirements.txt  # includes beautifulsoup4
 │   └── vetted/.gitkeep         # Store approved translations here
 ├── scripts/
 │   ├── html_to_json.py         # Converts cleaned HTML to the JSON schema
-│   └── translation_pipeline.py # Deterministic, offline translator-agent-v1
+│   └── translation_pipeline.py # Legacy deterministic stub (testing only)
 └── README.md
 ```
 
@@ -74,14 +80,15 @@ pip install -r requirements.txt  # includes beautifulsoup4
 - Detects German vs. Latin vs. Greek paragraphs, extracts footnotes, and creates per-page note identifiers (`page-<n>-note-<n>`).
 - Emits JSON with empty English translations but pre-populated metadata, timestamps, and Greek translations disabled by default (`show_by_default: false`).
 
-### `translation_pipeline.py`
-- Implements an offline, deterministic `translator-agent-v1` with lightweight glossaries for German, Latin, and Greek.
-- Applies phrase substitutions, counts glossary/domain hits, and records unresolved tokens.
-- Scores confidence:
-  - `high` if `unresolved ≤ 2` and `domain_hits ≥ 3`
-  - `flagged` if `unresolved ≥ 6` or any `[??]` placeholder remains
-  - `pending_review` otherwise
-- Fills `vetting_notes` with the rationale and unresolved list, resets vetting metadata, and stamps `timestamp` (UTC).
+### Translator orchestrator (LLM workflow)
+- Primary workflow is documented in `prompts/translator_orchestrator.md`.
+- Processes one paragraph at a time: spawn language agent, run improve pass, merge JSON, and append glossary observations.
+- After each batch, run `make glossary-compact` to refresh compiled and decision files for german/latin/greek.
+- Feed `glossaries/<lang>_decisions.json` into the next run as `glossary_json` (fall back to `{}` if unavailable).
+
+### Legacy: `translation_pipeline.py` (offline stub)
+- Deterministic fallback kept for unit tests or sandboxed demos without LLM access.
+- Performs simple dictionary/regex substitutions and confidence scoring but does **not** represent the orchestrated translation quality.
 
 ## Working with the Sample Dataset
 
