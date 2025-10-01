@@ -59,7 +59,7 @@ pip install -r requirements.txt  # includes beautifulsoup4
 
 ## Reader Highlights (`viewer.html`)
 
-- **Layout controls**: sticky header with search, translation visibility toggles, column/stacked view switch, font-size slider (12–24 px), and Greek font selector (GFS Didot, Gentium Plus, Linux Libertine, Noto Serif). Settings persist via `localStorage` along with scroll position.
+- **Layout controls**: sticky header with search, translation visibility toggles, column/stacked view switch, font-size slider (12–24 px), and Greek font selector (Literata or Arial). Settings persist via `localStorage` along with scroll position.
 - **Multilingual rendering**: paragraphs labelled by language with semantic `lang` attributes; Greek defaults to hidden English translations but can be revealed per paragraph or globally.
 - **Footnotes**: desktop hover tooltips stay in-bounds; mobile taps open an accessible bottom sheet that locks background scroll. Notes carry both the original text and English translation.
 - **Navigation**: generated index with smooth scrolling, URL hash updates, and paragraph-level “Back to index” links. Search filters across original and translated text with live feedback.

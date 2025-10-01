@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=GFSDidot&family=Gentium+Plus:ital@0;1&family=Linux+Libertine&family=Noto+Serif&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Literata:ital,wght@0,400;0,600;1,400;1,600&display=swap');
 
 :root {
   --font-size-base: 16px;
@@ -32,7 +32,7 @@ body {
   min-height: 100%;
   background: var(--color-background);
   color: var(--color-text);
-  font-family: "Georgia", "Times New Roman", serif;
+  font-family: 'Literata', Arial, sans-serif;
   font-size: var(--font-size-base);
   line-height: var(--line-height-base);
 }
@@ -292,13 +292,14 @@ h3 {
   }
 }
 
+
 .para-text {
   font-size: 1rem;
+  font-family: 'Literata', Arial, sans-serif;
 }
 
 .lang-de {
   color: var(--color-german);
-  font-family: "Linux Libertine", "Georgia", serif;
 }
 
 .lang-la {
@@ -308,7 +309,7 @@ h3 {
 
 .lang-grc {
   color: var(--color-greek);
-  font-family: 'GFS Didot', 'Gentium Plus', 'Linux Libertine', 'Noto Serif', 'Palatino Linotype', serif;
+  font-family: 'Literata', Arial, sans-serif;
   line-height: var(--line-height-greek);
 }
 
@@ -333,7 +334,7 @@ h3 {
 }
 
 .para-translation {
-  font-family: "Georgia", serif;
+  font-family: 'Literata', Arial, sans-serif;
   color: var(--color-translation);
   position: relative;
 }
@@ -701,7 +702,7 @@ h3 {
 }
 
 .file-mode-warning code {
-  font-family: 'Fira Code', 'Source Code Pro', monospace;
+  font-family: 'Literata', Arial, sans-serif;
 }
 
 .file-mode-warning a {

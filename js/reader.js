@@ -28,12 +28,14 @@ class MultilingualReader {
     this.sheetTranslation = document.getElementById('sheet-translation');
     this.sheetClose = document.getElementById('sheet-close');
 
+    this.allowedGreekFonts = new Set(['Literata', 'Arial']);
+
     this.settings = {
       showTranslations: true,
       showGreekTranslations: false,
       layout: 'parallel',
       fontSize: 16,
-      greekFont: 'GFS Didot'
+      greekFont: 'Literata'
     };
 
     this.restoreSettings();
@@ -172,9 +174,12 @@ class MultilingualReader {
       translationWrap.hidden = !visible;
       this.updateParagraphToggleButton(article, visible);
 
-      const greekFont = this.settings.greekFont || 'GFS Didot';
+      const greekFontSetting = this.allowedGreekFonts.has(this.settings.greekFont)
+        ? this.settings.greekFont
+        : 'Literata';
+      const greekStack = greekFontSetting === 'Arial' ? 'Arial, sans-serif' : "'Literata', Arial, sans-serif";
       if (para.original.lang === 'grc') {
-        originalWrap.style.fontFamily = `${greekFont}, 'Palatino Linotype', serif`;
+        originalWrap.style.fontFamily = greekStack;
       }
 
       this.paragraphElements.push(article);
@@ -479,12 +484,15 @@ class MultilingualReader {
   }
 
   applyGreekFont() {
-    const font = this.settings.greekFont || 'GFS Didot';
+    const font = this.allowedGreekFonts.has(this.settings.greekFont)
+      ? this.settings.greekFont
+      : 'Literata';
+    const stack = font === 'Arial' ? 'Arial, sans-serif' : "'Literata', Arial, sans-serif";
     this.paragraphElements.forEach((article) => {
       if (article.dataset.originalLang === 'grc') {
         const original = article.querySelector('.para-text');
         if (original) {
-          original.style.fontFamily = `${font}, 'Palatino Linotype', serif`;
+          original.style.fontFamily = stack;
         }
       }
     });
@@ -511,6 +519,9 @@ class MultilingualReader {
       if (stored) {
         const parsed = JSON.parse(stored);
         this.settings = { ...this.settings, ...parsed };
+        if (!this.allowedGreekFonts.has(this.settings.greekFont)) {
+          this.settings.greekFont = 'Literata';
+        }
       }
     } catch (error) {
       console.warn('Unable to restore settings', error);
