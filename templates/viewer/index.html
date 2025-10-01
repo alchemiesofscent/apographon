@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="de">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>German Book Viewer</title>
+    <link rel="stylesheet" href="viewer.css">
+  </head>
+  <body>
+    <header class="toolbar">
+      <div class="controls">
+        <label class="file-picker">
+          <input id="fileInput" type="file" accept="text/html,.html,.htm"/>
+          <span>Open cleaned.html…</span>
+        </label>
+        <input id="srcInput" type="text" placeholder="or URL/path to cleaned.html"/>
+        <button id="loadBtn" type="button">Load</button>
+      </div>
+      <div class="toggles">
+        <label><input type="checkbox" id="togglePb" checked> Page breaks</label>
+        <label><input type="checkbox" id="toggleCols" checked> Columns</label>
+        <label><input type="checkbox" id="toggleWide"> Wide layout</label>
+        <label><input type="checkbox" id="toggleInlineNotes"> Inline notes</label>
+        <button id="toggleToc" type="button" title="Toggle TOC">TOC</button>
+        <span id="currentSection" class="current-section" title="Current section"></span>
+        <span class="page-hud">
+          Page
+          <button id="prevPage" title="Previous page" aria-label="Previous page">◀</button>
+          <input id="pageInput" type="text" inputmode="numeric" pattern="[0-9]*" value="1" size="4"/>
+          / <span id="pageTotal">0</span>
+          <button id="nextPage" title="Next page" aria-label="Next page">▶</button>
+        </span>
+      </div>
+    </header>
+    <nav id="toc" class="toc" aria-label="Table of contents"></nav>
+
+    <main id="viewer">
+      <article class="work"><main id="content" class="content"></main></article>
+    </main>
+
+    <aside id="notes" class="notes-panel" aria-label="Footnotes">
+      <div class="hdr">
+        <strong>Footnote</strong>
+        <button id="closeNotes" title="Close">×</button>
+      </div>
+      <div id="noteBody" class="note-body"></div>
+      <div class="note-actions">
+        <button id="backToRef" title="Return to text">Back to text</button>
+      </div>
+    </aside>
+
+    <footer class="status" id="status">Ready.</footer>
+
+    <script src="viewer.js"></script>
+  </body>
+</html>

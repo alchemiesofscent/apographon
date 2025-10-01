@@ -86,3 +86,28 @@ pytest tests/
 ## Conclusion
 
 The German Book Converter provides a streamlined process for converting historical texts into modern formats. For further assistance, please refer to the README.md file or the source code documentation.
+
+## Viewer and TEI metadata
+
+To emit a minimal web viewer alongside outputs and pre-populate TEI header metadata:
+
+```
+python -m german_book_converter.cli \
+  --input data/raw/wellmann.html \
+  --output data/processed_out \
+  --skip-epub \
+  --with-viewer \
+  --meta-citation "Wellmann, M. (1895), Die pneumatische Schule bis auf Archigenes, Philologische Untersuchungen, Weidmannsche Buchhandlung." \
+  --meta-place Berlin
+```
+
+Open the viewer:
+
+- File-based (no server): open `data/processed_out/view.html` in a browser.
+- Local server: `python -m http.server -d data/processed_out 8000` and open `http://localhost:8000/viewer.html`.
+
+Metadata flags (all optional): `--meta-title`, `--meta-author`, `--meta-date`, `--meta-publisher`, `--meta-place`, `--meta-series`, `--meta-citation`.
+
+TEI in-browser:
+
+- When you pass `--with-viewer`, the converter also copies an XSL stylesheet `tei-viewer.xsl` next to `output.xml` and links it via an XML stylesheet PI. You can open `data/processed_out/output.xml` directly in a modern browser to view the TEI with the same layout, page-break HUD, TOC, and footnotes side panel/inline toggle.

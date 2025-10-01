@@ -1,87 +1,134 @@
-# German Book Converter
+# Scholion
 
-This project is designed to analyze a provided HTML file of a 19th-century German academic book and convert it into two formats: a reflowable EPUB and a TEI XML document. The conversion process utilizes Python and the Pandoc command-line tool to ensure high-quality output.
+Scholion is a pipeline for taking LLM‑based deep transcriptions of historical, mixed‑language works (Greek, Latin, and modern languages), normalizing them to clean HTML, converting to TEI and semantic HTML, and serving them in an accessible browser viewer. Ultimately, passages should link out to external projects (e.g., First1KGreek) for cross‑corpus navigation.
 
-## Project Structure
+This repository currently contains a working reference implementation evolved from a “German Book Converter”. Naming will migrate to Scholion as the scope generalizes.
 
-The project is organized as follows:
+## Goals
 
-- **src/**: Contains the main source code for the project.
-  - **german_book_converter/**: The main package containing all the conversion logic.
-    - `__init__.py`: Initializes the package.
-    - `cli.py`: Command-line interface for running the conversion.
-    - `converter.py`: Core logic for converting HTML to desired formats.
-    - `pandoc_wrapper.py`: Wrapper for the Pandoc tool.
-    - `tei_generator.py`: Generates the TEI XML document.
-    - `epub_generator.py`: Generates the EPUB file.
-    - `utils.py`: Utility functions for various tasks.
-  - **scripts/**: Contains scripts for environment checks and other utilities.
-    - `env_check.py`: Checks for necessary dependencies.
+- Accept mixed‑language, deep transcriptions (often with per‑page HTML and inline styles) produced by OCR/HTR/LLMs.
+- Produce a clean, flowing HTML with semantic markers for page breaks, columns, headings, and footnotes.
+- Generate enriched TEI with TEI header metadata, page break milestones, inline references with back‑pointers, and consolidated notes.
+- Provide a minimal, fast web viewer with keyboard navigation, TOC, page HUD, footnote panel/inline modes, and end indices that link to pages.
+- Enable future linking of text passages to external corpora (e.g., First1KGreek) by stable identifiers.
 
-- **data/**: Contains input and output data.
-  - **raw/**: Original HTML files to be processed.
-  - **processed/**: Directory for cleaned and processed files.
+## Data & Directory Structure
 
-- **templates/**: Contains templates for TEI and EPUB generation.
-  - **pandoc/**: Templates for Pandoc conversion.
-    - `tei_template.xml`: Template for TEI XML.
-    - `epub_metadata.yaml`: Metadata for EPUB.
-  - **css/**: CSS styles for EPUB formatting.
-    - `epub_styles.css`: Styles for the EPUB output.
+- `data/raw/` – Input “deep transcription” HTML(s). Example: `data/raw/wellmann.html`.
+- `data/processed_out/` – Outputs:
+  - `cleaned.html` – Cleaned, semantic HTML flow with `span.pb` markers, normalized footnotes, and consolidated notes.
+  - `output.xml` – TEI XML with header, `<pb/>` milestones, `<ref/>` back‑pointers, and `<back>` notes. Includes xml‑stylesheet PI for in‑browser rendering.
+  - `view.html` – Self‑contained viewer with embedded cleaned HTML.
+  - `viewer.html` – Viewer shell that autoloads `cleaned.html`.
+  - `viewer/` – Static viewer assets (`viewer.css`, `viewer.js`).
+  - `tei-viewer.xsl` – XSLT that renders TEI in the same viewer shell.
 
-- **tests/**: Contains unit tests for the project.
-  - `test_converter.py`: Tests for the converter functionality.
-  - `test_tei.py`: Tests for TEI generation.
-  - **fixtures/**: Sample HTML content for testing.
-    - `sample.html`: Sample HTML for tests.
+- `src/german_book_converter/` – Processing pipeline (will be renamed):
+  - `cleaner.py` – Flattens per‑page HTML into a single flow; emits `span.pb` with `data-n` + `id`; normalizes footnote refs; consolidates notes; removes bookplates/duplicates.
+  - `tei_generator.py` – Builds TEI with header metadata, `<pb/>`, inline `<ref target="#fn…" xml:id="ref-fn…">`, and `<ptr type="back" target="#ref-fn…">` from notes to refs.
+  - `converter.py` – Orchestrates clean → TEI → EPUB, and emits viewer shells.
 
-- **docs/**: Documentation for the project.
-  - `usage.md`: Instructions on how to use the project.
+- `templates/` – Templates and assets:
+  - `viewer/` – HTML/CSS/JS for the viewer.
+  - `tei/tei-viewer.xsl` – XSL stylesheet to render TEI with the same UI.
+  - `pandoc/` – EPUB/TEI metadata and templates (optional EPUB path).
 
-- **.github/**: Contains GitHub workflows for CI/CD.
-  - **workflows/**: CI workflow definitions.
-    - `ci.yml`: Continuous integration workflow.
+## Processing Pipeline
 
-- **scripts/**: Contains automation scripts.
-  - `build_epub.sh`: Script to build the EPUB file.
-  - `validate_tei.sh`: Script to validate TEI XML.
+1) Clean HTML → `cleaned.html`
+   - Insert page break markers: `<span class="pb" id="page-12" data-n="page-12" role="doc-pagebreak">`.
+   - Normalize footnote references to `a.fn-ref`; consolidate footnotes under `<section class="footnotes">`.
+   - Remove bookplates/duplicates and front‑matter numbers inside bare `<p>` following page breaks.
+   - Preserve semantic two‑column blocks via `<section class="columns" data-cols="2">`.
 
-- **Makefile**: Build instructions and commands.
+2) TEI → `output.xml`
+   - Create TEI header (with optional parsed citation metadata).
+   - Emit `<pb n="12" xml:id="page-12"/>` milestones.
+   - Inline `<ref target="#fn…" xml:id="ref-fn…-…">` for footnote refs; in back matter add `<ptr type="back">` to the first ref location.
+   - Link stylesheet PI to `tei-viewer.xsl` for direct browser viewing.
 
-- **pyproject.toml**: Project metadata and dependencies.
+3) EPUB (optional)
+   - Uses Pandoc if available.
 
-- **requirements.txt**: Required Python packages.
+4) Viewer
+   - `viewer.html` auto‑loads `cleaned.html`.
+   - `view.html` embeds the cleaned flow so it opens without fetch.
+   - TEI can be opened directly; the PI loads `tei-viewer.xsl` for the same UI.
 
-- **.gitignore**: Specifies files to ignore in Git.
+## Key Features
 
-- **LICENSE**: Licensing information for the project.
+- Footnotes
+  - Right‑side panel with “Back to text” button.
+  - Inline notes mode toggle (panel vs inline chips near refs).
+  - Adds “↩” back links inside footnote list items to the first referencing anchor.
 
-## Installation
+- Navigation and Layout
+  - Keyboard: ←/→ pages, ↑/↓ sections, t toggles TOC, w wide, c columns, b page breaks, g/Shift+G top/bottom, ? help.
+  - TOC panel (open by default) with current section tracking.
+  - Page HUD with page count from `span.pb`.
+  - Equal‑width columns via CSS `column-fill: balance`.
+  - Header bar is sticky and always visible.
 
-To set up the project, clone the repository and install the required dependencies:
+- Indices & TOC linking
+  - End “Sachregister” and “Stellenregister” are auto‑linkified to page ids; ranges and “ff.” link to the first page.
+  - Repairs broken anchors that look like page references.
+
+- Flow control
+  - With page breaks off, paragraphs split across a page boundary are merged with hyphenation‑aware joining (including soft hyphen handling).
+
+## Getting Started
+
+1) Install
 
 ```bash
-git clone <repository-url>
-cd german-book-converter
 pip install -r requirements.txt
+# optional: install pandoc for EPUB
 ```
 
-Ensure that Pandoc is installed on your system, as it is required for the conversion process.
-
-## Usage
-
-To convert the HTML file into EPUB and TEI formats, use the command-line interface:
+2) Convert a work and emit viewer
 
 ```bash
-python src/german_book_converter/cli.py --input data/raw/example.html --output data/processed/
+python -m german_book_converter.cli \
+  --input data/raw/wellmann.html \
+  --output data/processed_out \
+  --skip-epub \
+  --with-viewer \
+  --meta-citation "Wellmann, M. (1895), Die pneumatische Schule bis auf Archigenes, Philologische Untersuchungen, Weidmannsche Buchhandlung." \
+  --meta-place Berlin
 ```
 
-This command will process the provided HTML file and generate the corresponding EPUB and TEI XML documents in the specified output directory.
+Open the viewer:
+
+- File-based: open `data/processed_out/view.html` in a browser.
+- Local server: `python -m http.server -d data/processed_out 8000` → http://localhost:8000/viewer.html.
+
+Open TEI directly:
+
+- `data/processed_out/output.xml` includes an xml‑stylesheet PI; open it in a browser to see the same viewer UI.
+
+## Linking Out to External Projects
+
+Scholion aims to link passages to external corpora (e.g., First1KGreek). Planned approach:
+
+- Generate stable, human‑meaningful `xml:id` anchors at paragraph or sentence granularity in both HTML and TEI.
+- Recognize citation schemes and references in indices, body, and notes.
+- Maintain mapping tables from local anchors to canonical URNs/URLs (CTS, Perseus URNs, etc.).
+- Emit outbound links in both TEI (`<ref target>`/`<ptr target>`) and viewer HTML.
+
+## Implementation Plan (Roadmap)
+
+1) Solidify cleaner for more sources (normalize more inline styles; layout blocks).
+2) Strengthen TEI modeling (lists, figures, inline markup, languages).
+3) Passage anchoring & external linking (CTS/URNs, per‑work configs).
+4) Persist viewer states and per‑work settings (localStorage).
+5) Batch processing + provenance metadata per file.
+6) CI: schema validation (TEI), link checks, sample previews.
+7) Package rename from `german_book_converter` → `scholion` (API‑compatible wrappers).
 
 ## Contributing
 
-Contributions are welcome! Please submit a pull request or open an issue for any enhancements or bug fixes.
+Contributions welcome. Please open an issue or PR. See code in `src/german_book_converter/` (to be renamed) and viewer assets in `templates/viewer/`.
 
 ## License
 
-This project is licensed under the MIT License. See the LICENSE file for more details.
+MIT — see `LICENSE`.
