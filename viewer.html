@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Apographon Multilingual Reader</title>
+  <link rel="stylesheet" href="css/reader.css">
+</head>
+<body>
+  <div id="live-region" class="visually-hidden" aria-live="polite"></div>
+  <header>
+    <div class="header-inner" role="navigation" aria-label="Reader controls">
+      <div class="branding">
+        <h1>Apographon Reader</h1>
+        <small>Multilingual scholarly text viewer</small>
+      </div>
+      <div class="control-group">
+        <label for="search-input">Search passages</label>
+        <input type="search" id="search-input" name="search" placeholder="Search original or translation" aria-describedby="search-summary">
+        <div id="search-summary" role="status" aria-live="polite"></div>
+      </div>
+      <div class="control-group">
+        <span class="toggle-row" role="group" aria-label="Translation visibility">
+          <button type="button" id="toggle-translations" aria-pressed="true">Hide translations</button>
+          <button type="button" id="toggle-greek" aria-pressed="false">Show Greek translations</button>
+        </span>
+        <span class="toggle-row" role="group" aria-label="Layout mode">
+          <button type="button" id="toggle-layout" aria-pressed="true">Parallel columns</button>
+        </span>
+      </div>
+      <div class="control-group">
+        <label for="font-size">Font size <span id="font-size-value">16px</span></label>
+        <input type="range" id="font-size" min="12" max="24" value="16" aria-valuemin="12" aria-valuemax="24" aria-valuenow="16">
+      </div>
+      <div class="control-group">
+        <label for="greek-font">Greek font</label>
+        <select id="greek-font" name="greek-font">
+          <option value="GFS Didot" selected>GFS Didot (default)</option>
+          <option value="Gentium Plus">Gentium Plus</option>
+          <option value="Linux Libertine">Linux Libertine</option>
+          <option value="Noto Serif">Noto Serif</option>
+        </select>
+        <div class="settings-bar" aria-hidden="true">
+          <span id="settings-summary"></span>
+        </div>
+      </div>
+    </div>
+  </header>
+  <main>
+    <aside id="toc" aria-label="Document navigation" tabindex="-1">
+      <h2 id="toc-title">Index</h2>
+      <ul id="toc-list" role="list"></ul>
+    </aside>
+    <section id="reader" class="parallel" aria-labelledby="toc-title" tabindex="-1"></section>
+  </main>
+  <div class="sheet-backdrop" id="sheet-backdrop" hidden></div>
+  <aside class="footnote-sheet" id="footnote-sheet" aria-modal="true" aria-labelledby="sheet-heading" role="dialog" tabindex="-1">
+    <header>
+      <h3 id="sheet-heading" class="sheet-title">Footnote</h3>
+      <button type="button" class="sheet-close" id="sheet-close" aria-label="Close footnote">×</button>
+    </header>
+    <div class="note-original" id="sheet-original"></div>
+    <div class="note-translation" id="sheet-translation"></div>
+  </aside>
+  <script src="js/reader.js" defer></script>
+  <script>
+    window.addEventListener('DOMContentLoaded', () => {
+      const reader = new MultilingualReader({
+        containerId: 'reader',
+        tocListId: 'toc-list',
+        dataUrl: 'data/sample.json'
+      });
+
+      reader
+        .loadData(reader.dataUrl)
+        .catch((err) => {
+          console.error(err);
+          const live = document.getElementById('live-region');
+          live.textContent = 'Failed to load document data.';
+
+          const fallback = document.createElement('div');
+          fallback.className = 'file-mode-warning';
+          fallback.innerHTML = `
+            <h2>Unable to load document</h2>
+            <p>This viewer needs to fetch <code>data/sample.json</code>. Browsers block those requests when opened directly with <code>file://</code>.</p>
+            <p>To run locally, start a tiny server in this folder:</p>
+            <pre><code>python -m http.server 8000</code></pre>
+            <p>Then open <a href="http://localhost:8000/viewer.html">http://localhost:8000/viewer.html</a>.</p>
+          `;
+          const main = document.querySelector('main');
+          if (main) {
+            main.replaceChildren(fallback);
+          } else {
+            document.body.appendChild(fallback);
+          }
+        });
+    });
+  </script>
+</body>
+</html>

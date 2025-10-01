@@ -676,3 +676,35 @@ h3 {
   gap: 0.35rem;
   font-weight: 600;
 }
+.file-mode-warning {
+  max-width: 720px;
+  margin: 4rem auto;
+  background: #fff7e6;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 12px;
+  padding: 2rem;
+  box-shadow: 0 18px 40px -20px rgba(0, 0, 0, 0.25);
+  color: #5f4513;
+}
+
+.file-mode-warning h2 {
+  margin-top: 0;
+  font-size: 1.4rem;
+}
+
+.file-mode-warning pre {
+  background: rgba(0, 0, 0, 0.15);
+  color: #fff;
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  overflow-x: auto;
+}
+
+.file-mode-warning code {
+  font-family: 'Fira Code', 'Source Code Pro', monospace;
+}
+
+.file-mode-warning a {
+  color: #8a4d00;
+  text-decoration: underline;
+}
