@@ -10,13 +10,13 @@
 * { box-sizing: border-box; }
 html, body { height: 100%; }
 body {
-  margin: 0; padding: 0;
+  margin: 0; padding: 3.2rem 0 0 0; /* reserve space for fixed toolbar */
   background: var(--bg); color: var(--fg);
   font: 16px/1.55 system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, sans-serif;
 }
 
 .toolbar {
-  position: sticky; top: 0; z-index: 1000;
+  position: fixed; top: 0; left: 0; right: 0; z-index: 2000;
   display: flex; flex-wrap: wrap; gap: .75rem; align-items: center;
   padding: .6rem .9rem; background: #0c0c0c; border-bottom: 1px solid var(--rule);
 }
@@ -50,11 +50,22 @@ body {
 .hide-pb .content .pb { display: none; }
 
 /* Two-column blocks (semantic wrapper converted from inline CSS) */
-.content .columns { column-gap: 2rem; margin: 1rem 0; }
+.content .columns {
+  /* Full-bleed so each column equals viewport width / N */
+  width: 100vw;
+  margin: 1rem 0;
+  margin-left: calc(50% - 50vw);
+  margin-right: calc(50% - 50vw);
+  padding: 0 1rem;
+  box-sizing: border-box;
+  column-gap: 2rem;
+  column-fill: balance;
+}
 .content .columns[data-cols="2"] { column-count: 2; }
 .content .columns[data-cols="3"] { column-count: 3; }
-.content .columns { width: 100%; column-fill: balance; }
 .no-cols .content .columns { column-count: 1 !important; }
+/* Force single-column for index sections when requested */
+.content .columns.flow-single { column-count: 1 !important; }
 
 /* Footnotes block */
 .content section.footnotes { margin-top: 2rem; padding-top: 1rem; border-top: 1px solid var(--rule); font-size: .9rem; color: var(--muted); }

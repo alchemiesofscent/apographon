@@ -222,6 +222,11 @@
     // Flow paragraphs across page breaks if page breaks are disabled
     if (el.togglePb && !el.togglePb.checked) {
       mergeParagraphsAcrossPagebreaks(el.content);
+      // In flow mode, make index sections single-column
+      setIndexSectionsSingleColumn(el.content, true);
+    } else {
+      // Restore multi-column for index sections when not in flow mode
+      setIndexSectionsSingleColumn(el.content, false);
     }
     buildTOC();
     setupPagesHUD();
@@ -230,6 +235,28 @@
     applyToggles();
     // Open TOC by default
     document.documentElement.classList.add('toc-open');
+  }
+
+  function setIndexSectionsSingleColumn(container, enable) {
+    // Find headings for index sections by title text
+    const heads = Array.from(container.querySelectorAll('h1, h2, h3'));
+    const isIndexHead = (h) => {
+      const t = (h.textContent || '').toLowerCase();
+      return t.includes('sachregister') || t.includes('stellenregister');
+    };
+    heads.forEach(h => {
+      if (!isIndexHead(h)) return;
+      const level = parseInt(h.tagName.substring(1), 10) || 6;
+      for (let cur = h.nextElementSibling; cur; cur = cur.nextElementSibling) {
+        const isHead = /^H[1-6]$/.test(cur.tagName);
+        if (isHead && (parseInt(cur.tagName.substring(1), 10) <= level)) break;
+        // Toggle flow-single on any .columns within this section range
+        cur.querySelectorAll('.columns').forEach(col => {
+          if (enable) col.classList.add('flow-single');
+          else col.classList.remove('flow-single');
+        });
+      }
+    });
   }
 
   async function loadFromURL(url) {
@@ -322,6 +349,8 @@
     toc.innerHTML = '';
     const hs = el.content.querySelectorAll('h1, h2, h3');
     if (!hs.length) { toc.style.display = 'none'; return; }
+    // headings present; allow CSS to control visibility
+    toc.style.display = '';
     const frag = document.createDocumentFragment();
     hs.forEach(h => {
       const id = ensureId(h);
