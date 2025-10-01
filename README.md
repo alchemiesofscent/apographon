@@ -1,8 +1,8 @@
-# Scholion
+# Apographon
 
-Scholion is a pipeline for taking LLM‑based deep transcriptions of historical, mixed‑language works (Greek, Latin, and modern languages), normalizing them to clean HTML, converting to TEI and semantic HTML, and serving them in an accessible browser viewer. Ultimately, passages should link out to external projects (e.g., First1KGreek) for cross‑corpus navigation.
+Apographon is a pipeline for taking LLM‑based deep transcriptions of historical, mixed‑language works (Greek, Latin, and modern languages), normalizing them to clean HTML, converting to TEI and semantic HTML, and serving them in an accessible browser viewer. Ultimately, passages should link out to external projects (e.g., First1KGreek) for cross‑corpus navigation.
 
-This repository currently contains a working reference implementation evolved from a “German Book Converter”. Naming will migrate to Scholion as the scope generalizes.
+This repository currently contains a working reference implementation evolved from a “German Book Converter”. Naming will migrate to Apographon as the scope generalizes.
 
 ## Goals
 
@@ -108,7 +108,7 @@ Open TEI directly:
 
 ## Linking Out to External Projects
 
-Scholion aims to link passages to external corpora (e.g., First1KGreek). Planned approach:
+Apographon aims to link passages to external corpora (e.g., First1KGreek). Planned approach:
 
 - Generate stable, human‑meaningful `xml:id` anchors at paragraph or sentence granularity in both HTML and TEI.
 - Recognize citation schemes and references in indices, body, and notes.
