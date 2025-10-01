@@ -106,6 +106,13 @@ Open TEI directly:
 
 - `data/processed_out/output.xml` includes an xml‑stylesheet PI; open it in a browser to see the same viewer UI.
 
+## GitHub Pages Preview
+
+This repository publishes a live preview of the viewer and TEI via GitHub Pages. The workflow `.github/workflows/pages.yml` builds `data/raw/wellmann.html` to a static `site/` and deploys it on pushes to `main`.
+
+- Preview URL: `https://alchemiesofscent.github.io/apographon/`
+- Links included: Viewer (`viewer.html`), Embedded View (`view.html`), Cleaned HTML, and TEI (`output.xml`).
+
 ## Linking Out to External Projects
 
 Apographon aims to link passages to external corpora (e.g., First1KGreek). Planned approach:
