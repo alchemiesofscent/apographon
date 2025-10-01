@@ -2,7 +2,7 @@
 
 Apographon is a pipeline for taking LLM‑based deep transcriptions of historical, mixed‑language works (Greek, Latin, and modern languages), normalizing them to clean HTML, converting to TEI and semantic HTML, and serving them in an accessible browser viewer. Ultimately, passages should link out to external projects (e.g., First1KGreek) for cross‑corpus navigation.
 
-This repository currently contains a working reference implementation evolved from a “German Book Converter”. The Python package name remains `german_book_converter` for compatibility; the CLI and repository use the name Apographon.
+This repository currently contains a working reference implementation evolved from a “German Book Converter”. The Python package is now `apographon`; the CLI and repository share the same name.
 
 ## Goals
 
@@ -23,7 +23,7 @@ This repository currently contains a working reference implementation evolved fr
   - `viewer/` – Static viewer assets (`viewer.css`, `viewer.js`).
   - `tei-viewer.xsl` – XSLT that renders TEI in the same viewer shell.
 
-- `src/german_book_converter/` – Processing pipeline (package name kept for compatibility):
+- `src/apographon/` – Processing pipeline:
   - `cleaner.py` – Flattens per‑page HTML into a single flow; emits `span.pb` with `data-n` + `id`; normalizes footnote refs; consolidates notes; removes bookplates/duplicates.
   - `tei_generator.py` – Builds TEI with header metadata, `<pb/>`, inline `<ref target="#fn…" xml:id="ref-fn…">`, and `<ptr type="back" target="#ref-fn…">` from notes to refs.
   - `converter.py` – Orchestrates clean → TEI → EPUB, and emits viewer shells.
@@ -130,11 +130,11 @@ Apographon aims to link passages to external corpora (e.g., First1KGreek). Plann
 4) Persist viewer states and per‑work settings (localStorage).
 5) Batch processing + provenance metadata per file.
 6) CI: schema validation (TEI), link checks, sample previews.
-7) Package rename from `german_book_converter` → `scholion` (API‑compatible wrappers).
+7) Package rename from `apographon` → `scholion` (API‑compatible wrappers).
 
 ## Contributing
 
-Contributions welcome. Please open an issue or PR. See code in `src/german_book_converter/` (to be renamed) and viewer assets in `templates/viewer/`.
+Contributions welcome. Please open an issue or PR. See code in `src/apographon/` and viewer assets in `templates/viewer/`.
 
 ## License
 

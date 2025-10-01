@@ -1,5 +1,5 @@
 import argparse
-from german_book_converter.converter import GermanBookConverter
+from apographon.converter import GermanBookConverter
 
 
 def main():

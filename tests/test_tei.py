@@ -1,5 +1,5 @@
 import unittest
-from german_book_converter.tei_generator import generate_tei
+from apographon.tei_generator import generate_tei
 
 class TestTEIGenerator(unittest.TestCase):
     def setUp(self):

@@ -1,5 +1,5 @@
 import unittest
-from german_book_converter.converter import Converter
+from apographon.converter import Converter
 
 class TestConverter(unittest.TestCase):
 
