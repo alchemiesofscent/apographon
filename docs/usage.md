@@ -92,7 +92,7 @@ The German Book Converter provides a streamlined process for converting historic
 To emit a minimal web viewer alongside outputs and pre-populate TEI header metadata:
 
 ```
-python -m german_book_converter.cli \
+apographon \
   --input data/raw/wellmann.html \
   --output data/processed_out \
   --skip-epub \

@@ -2,7 +2,7 @@
 
 Apographon is a pipeline for taking LLM‑based deep transcriptions of historical, mixed‑language works (Greek, Latin, and modern languages), normalizing them to clean HTML, converting to TEI and semantic HTML, and serving them in an accessible browser viewer. Ultimately, passages should link out to external projects (e.g., First1KGreek) for cross‑corpus navigation.
 
-This repository currently contains a working reference implementation evolved from a “German Book Converter”. Naming will migrate to Apographon as the scope generalizes.
+This repository currently contains a working reference implementation evolved from a “German Book Converter”. The Python package name remains `german_book_converter` for compatibility; the CLI and repository use the name Apographon.
 
 ## Goals
 
@@ -23,7 +23,7 @@ This repository currently contains a working reference implementation evolved fr
   - `viewer/` – Static viewer assets (`viewer.css`, `viewer.js`).
   - `tei-viewer.xsl` – XSLT that renders TEI in the same viewer shell.
 
-- `src/german_book_converter/` – Processing pipeline (will be renamed):
+- `src/german_book_converter/` – Processing pipeline (package name kept for compatibility):
   - `cleaner.py` – Flattens per‑page HTML into a single flow; emits `span.pb` with `data-n` + `id`; normalizes footnote refs; consolidates notes; removes bookplates/duplicates.
   - `tei_generator.py` – Builds TEI with header metadata, `<pb/>`, inline `<ref target="#fn…" xml:id="ref-fn…">`, and `<ptr type="back" target="#ref-fn…">` from notes to refs.
   - `converter.py` – Orchestrates clean → TEI → EPUB, and emits viewer shells.
@@ -88,7 +88,7 @@ pip install -r requirements.txt
 2) Convert a work and emit viewer
 
 ```bash
-python -m german_book_converter.cli \
+apographon \
   --input data/raw/wellmann.html \
   --output data/processed_out \
   --skip-epub \
