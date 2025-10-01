@@ -8,7 +8,7 @@ import json
 import re
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Dict, List, Tuple
+from typing import Dict, List, Tuple, Optional
 
 try:
     from bs4 import BeautifulSoup, NavigableString, Tag  # type: ignore
@@ -112,16 +112,202 @@ def superscript(marker: str) -> str:
     return marker
 
 
-def extract_paragraphs(soup: BeautifulSoup) -> List[Tag]:
+def parse_page_identifier(value: Optional[str]) -> Optional[int]:
+    if not value:
+        return None
+    match = re.search(r"(\d+)", value)
+    if match:
+        try:
+            return int(match.group(1))
+        except ValueError:
+            return None
+    return None
+
+
+def is_page_number(text: str) -> bool:
+    stripped = text.strip()
+    return bool(stripped) and stripped.isdigit()
+
+
+def extract_heading_text(tag: Tag) -> str:
+    return clean_text(tag.get_text(" "))
+
+
+def collect_fragments(soup: BeautifulSoup, footnotes: Dict[str, str]) -> List[Dict[str, object]]:
+    fragments: List[Dict[str, object]] = []
     body = soup.body if soup.body else soup
-    paragraphs: List[Tag] = []
-    for p in body.find_all("p"):
-        if p.find_parent(class_="footnotes"):
+
+    for footnote_section in body.select(".footnotes"):
+        footnote_section.decompose()
+
+    for element in body.descendants:
+        if isinstance(element, Tag):
+            if element.name == "div" and "page" in element.get("class", []):
+                page_num = parse_page_identifier(element.get("id"))
+                for child in element.descendants:
+                    if not isinstance(child, Tag):
+                        continue
+                    if child.name == "p":
+                        text, notes = extract_paragraph_content(child, footnotes)
+                        text = clean_text(text)
+                        if not text:
+                            continue
+                        if is_page_number(text):
+                            # Update page number if the identifier was missing.
+                            if page_num is None:
+                                try:
+                                    page_num = int(text.strip())
+                                except ValueError:
+                                    pass
+                            continue
+                        lang = detect_language(text)
+                        fragments.append(
+                            {
+                                "text": text,
+                                "notes": notes,
+                                "lang": lang,
+                                "show_by_default": lang != "grc",
+                                "page": page_num,
+                            }
+                        )
+                    elif child.name in {"h1", "h2", "h3", "h4", "h5"}:
+                        heading = extract_heading_text(child)
+                        if not heading:
+                            continue
+                        lang = detect_language(heading)
+                        fragments.append(
+                            {
+                                "text": heading,
+                                "notes": [],
+                                "lang": lang,
+                                "show_by_default": lang != "grc",
+                                "page": page_num,
+                            }
+                        )
+            elif element.name == "p":
+                # Catch paragraphs outside explicit page containers.
+                if element.find_parent(class_="page"):
+                    continue
+                text, notes = extract_paragraph_content(element, footnotes)
+                text = clean_text(text)
+                if not text or is_page_number(text):
+                    continue
+                lang = detect_language(text)
+                fragments.append(
+                    {
+                        "text": text,
+                        "notes": notes,
+                        "lang": lang,
+                        "show_by_default": lang != "grc",
+                        "page": None,
+                    }
+                )
+    return fragments
+
+
+def first_alpha_character(text: str) -> str:
+    for char in text:
+        if char.isalpha():
+            return char
+    return ""
+
+
+def should_merge(prev_text: str, next_text: str) -> bool:
+    prev_trimmed = prev_text.rstrip()
+    if not prev_trimmed:
+        return False
+    last_char = prev_trimmed[-1]
+    first_alpha = first_alpha_character(next_text.lstrip())
+    if last_char in {".", "!", "?"} and (not first_alpha or first_alpha.isupper()):
+        return False
+    return True
+
+
+def merge_fragments(fragments: List[Dict[str, object]]) -> List[Dict[str, object]]:
+    merged: List[Dict[str, object]] = []
+    current: Optional[Dict[str, object]] = None
+
+    for fragment in fragments:
+        text = fragment["text"]  # type: ignore[assignment]
+        notes = fragment["notes"]  # type: ignore[assignment]
+        lang = fragment["lang"]  # type: ignore[assignment]
+        show_by_default = fragment["show_by_default"]  # type: ignore[assignment]
+        page = fragment["page"]  # type: ignore[assignment]
+
+        if current is None:
+            current = {
+                "text": text,
+                "notes": list(notes),
+                "lang": lang,
+                "show_by_default": show_by_default,
+                "pages": [page] if page is not None else [],
+                "page_breaks": [],
+            }
             continue
-        if not p.get_text(strip=True):
+
+        current_text = current["text"]  # type: ignore[index]
+        current_lang = current["lang"]  # type: ignore[index]
+        current_show = current["show_by_default"]  # type: ignore[index]
+
+        if current_lang != lang or current_show != show_by_default:
+            merged.append(current)
+            current = {
+                "text": text,
+                "notes": list(notes),
+                "lang": lang,
+                "show_by_default": show_by_default,
+                "pages": [page] if page is not None else [],
+                "page_breaks": [],
+            }
             continue
-        paragraphs.append(p)
-    return paragraphs
+
+        if should_merge(current_text, text):
+            if page is not None:
+                pages: List[int] = current["pages"]  # type: ignore[index]
+                if not pages or pages[-1] != page:
+                    page_breaks: List[Dict[str, int]] = current["page_breaks"]  # type: ignore[index]
+                    page_breaks.append({"page": page, "offset": len(current_text)})
+                    pages.append(page)
+            combined_text = clean_text(f"{current_text} {text}")
+            current["text"] = combined_text
+            current_notes = current["notes"]  # type: ignore[index]
+            current_notes.extend(notes)
+        else:
+            merged.append(current)
+            current = {
+                "text": text,
+                "notes": list(notes),
+                "lang": lang,
+                "show_by_default": show_by_default,
+                "pages": [page] if page is not None else [],
+                "page_breaks": [],
+            }
+
+    if current is not None:
+        merged.append(current)
+
+    payload: List[Dict[str, object]] = []
+    for entry in merged:
+        pages: List[int] = entry["pages"]  # type: ignore[index]
+        original: Dict[str, object] = {
+            "lang": entry["lang"],
+            "text": entry["text"],
+            "notes": entry["notes"],
+        }
+        if pages:
+            original["page"] = pages[0]
+            original["pages"] = pages
+            if len(pages) > 1:
+                original["page_breaks"] = entry["page_breaks"]
+        else:
+            original["page"] = None
+        payload.append(
+            {
+                "original": original,
+                "show_by_default": entry["show_by_default"],
+            }
+        )
+    return payload
 
 
 def clean_text(text: str) -> str:
@@ -203,25 +389,8 @@ def main() -> None:
     metadata = gather_metadata(soup)
     footnotes = build_footnote_map(soup)
 
-    paragraph_nodes = extract_paragraphs(soup)
-    paragraph_payload: List[Dict[str, object]] = []
-
-    for node in paragraph_nodes:
-        text, notes = extract_paragraph_content(node, footnotes)
-        if not text:
-            continue
-        lang = detect_language(text)
-        show_by_default = False if lang == "grc" else True
-        paragraph_payload.append(
-            {
-                "original": {
-                    "lang": lang,
-                    "text": text,
-                    "notes": notes
-                },
-                "show_by_default": show_by_default,
-            }
-        )
+    fragments = collect_fragments(soup, footnotes)
+    paragraph_payload = merge_fragments(fragments)
 
     document = build_document(paragraph_payload, metadata)
     output_path.parent.mkdir(parents=True, exist_ok=True)
