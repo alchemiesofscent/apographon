@@ -15,9 +15,9 @@ pip install -r requirements.txt  # includes beautifulsoup4
 
 1. **Convert HTML to JSON**
    ```bash
-   python scripts/html_to_json.py data/raw/wellmann.html data/documents/wellmann.json
+   python scripts/html_to_json.py data/raw/wellmann.html
    ```
-   The converter detects paragraph language, column footnotes, and emits JSON conforming to `data/sample.json`.
+   The converter detects paragraph language, column footnotes, and emits JSON conforming to `data/sample.json`, writing to `data/documents/wellmann.json` by default. Supply an explicit path if you need a different filename.
 
 2. **Trim to the first 15 pages for each batch**
    ```bash
@@ -37,7 +37,7 @@ pip install -r requirements.txt  # includes beautifulsoup4
 
 5. **Publish to GitHub Pages**
    - Commit vetted JSON under `data/vetted/` and deploy.
-   - `viewer.html` reads from `data/sample.json` by default—swap the URL or wire a simple index if you host multiple works.
+   - `viewer.html` now targets `data/documents/wellmann.json`—swap the URL or wire a simple index if you host multiple works.
 
 ## Project Layout
 
@@ -48,9 +48,11 @@ pip install -r requirements.txt  # includes beautifulsoup4
 ├── viewer.html                 # Static reader UI (sticky controls, footnotes, index)
 ├── vetting.html                # Vetting workspace with contenteditable translations
 ├── data/
-│   ├── sample.json             # Worked sample from Wellmann with German, Latin, Greek
-│   ├── documents/.gitkeep      # Place machine-converted JSON here
-│   └── vetted/.gitkeep         # Store approved translations here
+│   ├── raw/                    # Source HTML and other upstream artefacts
+│   ├── processed/              # Intermediate cleaned assets (see README inside)
+│   ├── documents/              # Machine-converted JSON (Apographon schema)
+│   ├── vetted/                 # Human-approved translations ready for publication
+│   └── sample.json             # Worked example exercising the toolchain
 ├── scripts/
 │   ├── html_to_json.py         # Converts cleaned HTML to the JSON schema
 │   └── translation_pipeline.py # Legacy deterministic stub (testing only)

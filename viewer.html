@@ -66,7 +66,8 @@
       const reader = new MultilingualReader({
         containerId: 'reader',
         tocListId: 'toc-list',
-        dataUrl: 'data/sample.json'
+        dataUrl: 'data/documents/wellmann.json',
+        pageOffset: -6
       });
 
       reader
@@ -80,7 +81,7 @@
           fallback.className = 'file-mode-warning';
           fallback.innerHTML = `
             <h2>Unable to load document</h2>
-            <p>This viewer needs to fetch <code>data/sample.json</code>. Browsers block those requests when opened directly with <code>file://</code>.</p>
+            <p>This viewer needs to fetch <code>data/documents/wellmann.json</code>. Browsers block those requests when opened directly with <code>file://</code>.</p>
             <p>To run locally, start a tiny server in this folder:</p>
             <pre><code>python -m http.server 8000</code></pre>
             <p>Then open <a href="http://localhost:8000/viewer.html">http://localhost:8000/viewer.html</a>.</p>

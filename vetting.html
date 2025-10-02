@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Apographon Vetting Console</title>
+  <link rel="stylesheet" href="css/reader.css">
+</head>
+<body>
+  <div class="vetting-wrapper" role="application">
+    <header class="branding">
+      <h1>Vetting Console</h1>
+      <small>Review, approve, or flag translations produced by translator-agent-v1</small>
+    </header>
+
+    <section class="vetting-panel" aria-labelledby="load-heading">
+      <h2 id="load-heading">Load Document</h2>
+      <div class="vetting-controls">
+        <label>
+          <span>Choose JSON file</span>
+          <input type="file" id="file-input" accept="application/json">
+        </label>
+        <button type="button" id="load-sample">Load sample (data/sample.json)</button>
+        <label>
+          <span>Vetter name</span>
+          <input type="text" id="vetter-name" placeholder="Enter your name" required>
+        </label>
+        <label>
+          <span>Notes (for flags or contextual remarks)</span>
+          <textarea id="vetter-notes" rows="3"></textarea>
+        </label>
+      </div>
+      <p id="load-status" role="status" aria-live="polite"></p>
+      <div class="progress-indicator" id="progress-indicator">No document loaded.</div>
+    </section>
+
+    <section class="vetting-panel vetting-status" id="paragraph-panel" hidden>
+      <h2 id="paragraph-heading">Paragraph Review</h2>
+      <article>
+        <h3 id="original-label">Original Passage</h3>
+        <div id="original-text" class="para-text"></div>
+        <div id="footnote-list"></div>
+      </article>
+      <article>
+        <h3>English Translation</h3>
+        <div id="translation-editor" class="translation-editor" contenteditable="true" role="textbox" aria-multiline="true"></div>
+      </article>
+      <div class="vetting-actions">
+        <button type="button" class="approve" id="approve-btn">Approve</button>
+        <button type="button" class="flag" id="flag-btn">Flag</button>
+        <button type="button" class="skip" id="skip-btn">Skip</button>
+      </div>
+    </section>
+
+    <section class="vetting-panel" id="export-panel" hidden aria-labelledby="export-heading">
+      <h2 id="export-heading">Export</h2>
+      <p>When you are satisfied with your decisions, download the vetted file and place it under <code>data/vetted/</code>.</p>
+      <button type="button" id="download-btn" class="download-link">Download vetted JSON</button>
+    </section>
+  </div>
+
+  <script>
+    const state = {
+      document: null,
+      index: 0
+    };
+
+    const elements = {
+      fileInput: document.getElementById('file-input'),
+      loadSample: document.getElementById('load-sample'),
+      vetterName: document.getElementById('vetter-name'),
+      vetterNotes: document.getElementById('vetter-notes'),
+      loadStatus: document.getElementById('load-status'),
+      progress: document.getElementById('progress-indicator'),
+      panel: document.getElementById('paragraph-panel'),
+      paragraphHeading: document.getElementById('paragraph-heading'),
+      original: document.getElementById('original-text'),
+      footnotes: document.getElementById('footnote-list'),
+      editor: document.getElementById('translation-editor'),
+      approve: document.getElementById('approve-btn'),
+      flag: document.getElementById('flag-btn'),
+      skip: document.getElementById('skip-btn'),
+      exportPanel: document.getElementById('export-panel'),
+      download: document.getElementById('download-btn')
+    };
+
+    function readFile(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => {
+          try {
+            const data = JSON.parse(reader.result);
+            resolve(data);
+          } catch (error) {
+            reject(error);
+          }
+        };
+        reader.onerror = reject;
+        reader.readAsText(file);
+      });
+    }
+
+    async function loadSample() {
+      try {
+        const response = await fetch('data/sample.json', { cache: 'no-cache' });
+        if (!response.ok) {
+          throw new Error('Unable to load sample JSON');
+        }
+        return await response.json();
+      } catch (error) {
+        throw error;
+      }
+    }
+
+    function resetState() {
+      state.document = null;
+      state.index = 0;
+      elements.panel.hidden = true;
+      elements.exportPanel.hidden = true;
+      elements.original.innerHTML = '';
+      elements.footnotes.innerHTML = '';
+      elements.editor.textContent = '';
+      elements.progress.textContent = 'No document loaded.';
+      elements.loadStatus.textContent = '';
+    }
+
+    function bindEvents() {
+      elements.fileInput.addEventListener('change', async (event) => {
+        const [file] = event.target.files;
+        if (!file) {
+          return;
+        }
+        try {
+          const data = await readFile(file);
+          ingestDocument(data);
+          elements.loadStatus.textContent = `Loaded ${file.name}`;
+        } catch (error) {
+          elements.loadStatus.textContent = 'Unable to parse JSON file.';
+          console.error(error);
+        }
+      });
+
+      elements.loadSample.addEventListener('click', async () => {
+        try {
+          const data = await loadSample();
+          ingestDocument(data);
+          elements.loadStatus.textContent = 'Sample loaded.';
+        } catch (error) {
+          elements.loadStatus.textContent = 'Unable to load sample JSON.';
+          console.error(error);
+        }
+      });
+
+      elements.approve.addEventListener('click', () => applyDecision('high'));
+      elements.flag.addEventListener('click', () => applyDecision('flagged'));
+      elements.skip.addEventListener('click', () => advanceIndex());
+      elements.download.addEventListener('click', downloadVetted);
+    }
+
+    function ingestDocument(data) {
+      resetState();
+      state.document = data;
+      state.index = 0;
+      elements.panel.hidden = false;
+      elements.exportPanel.hidden = false;
+      renderCurrent();
+    }
+
+    function renderCurrent() {
+      const doc = state.document;
+      if (!doc) {
+        return;
+      }
+      const paragraphs = doc.document.paragraphs;
+      if (state.index >= paragraphs.length) {
+        elements.progress.textContent = 'Review complete. You may export the vetted file.';
+        elements.panel.classList.remove('approved', 'flagged');
+        elements.loadStatus.textContent = 'Review finished. Use download to export the vetted file.';
+        elements.original.textContent = 'All passages have been reviewed.';
+        elements.footnotes.innerHTML = '';
+        elements.editor.textContent = '';
+        elements.editor.setAttribute('contenteditable', 'false');
+        return;
+      }
+
+      const current = paragraphs[state.index];
+      elements.paragraphHeading.textContent = `Paragraph ${state.index + 1} of ${paragraphs.length}`;
+      elements.progress.textContent = `Reviewing ${state.index + 1} / ${paragraphs.length}`;
+      elements.original.innerHTML = '';
+      elements.original.appendChild(renderOriginal(current));
+      renderFootnotes(current);
+      elements.editor.textContent = current.translation.text;
+      elements.editor.setAttribute('contenteditable', 'true');
+      elements.panel.classList.remove('approved', 'flagged');
+    }
+
+    function renderOriginal(paragraph) {
+      const wrapper = document.createElement('div');
+      const body = document.createElement('p');
+      body.textContent = paragraph.original.text;
+      wrapper.appendChild(body);
+      return wrapper;
+    }
+
+    function renderFootnotes(paragraph) {
+      elements.footnotes.innerHTML = '';
+      if (!paragraph.original.notes || paragraph.original.notes.length === 0) {
+        return;
+      }
+      const list = document.createElement('ol');
+      paragraph.original.notes.forEach((note) => {
+        const item = document.createElement('li');
+        const original = document.createElement('p');
+        original.textContent = `${note.marker}. ${note.text}`;
+        item.appendChild(original);
+        if (note.translation) {
+          const english = document.createElement('p');
+          english.textContent = `English: ${note.translation}`;
+          item.appendChild(english);
+        }
+        list.appendChild(item);
+      });
+      elements.footnotes.appendChild(list);
+    }
+
+    function applyDecision(confidence) {
+      if (!state.document) {
+        return;
+      }
+      const name = elements.vetterName.value.trim();
+      if (!name) {
+        elements.loadStatus.textContent = 'Enter your name before recording a decision.';
+        return;
+      }
+      if (confidence === 'flagged' && !elements.vetterNotes.value.trim()) {
+        elements.loadStatus.textContent = 'Notes are required when flagging a translation.';
+        return;
+      }
+
+      const paragraphs = state.document.document.paragraphs;
+      if (state.index >= paragraphs.length) {
+        elements.loadStatus.textContent = 'All passages reviewed. Export the vetted file.';
+        return;
+      }
+      const current = paragraphs[state.index];
+      const nowIso = new Date().toISOString();
+      current.translation.text = elements.editor.textContent.trim();
+      current.translation.vetted_by = name;
+      current.translation.vetting_notes = elements.vetterNotes.value.trim();
+      current.translation.vetting_date = nowIso;
+      current.translation.confidence = confidence === 'high' ? 'high' : 'flagged';
+
+      elements.panel.classList.remove('approved', 'flagged');
+      elements.panel.classList.add(confidence === 'high' ? 'approved' : 'flagged');
+
+      elements.vetterNotes.value = '';
+
+      advanceIndex();
+    }
+
+    function advanceIndex() {
+      if (!state.document) {
+        return;
+      }
+      const paragraphs = state.document.document.paragraphs;
+      if (state.index < paragraphs.length - 1) {
+        state.index += 1;
+        renderCurrent();
+      } else {
+        state.index = paragraphs.length;
+        renderCurrent();
+      }
+    }
+
+    function downloadVetted() {
+      if (!state.document) {
+        elements.loadStatus.textContent = 'Load a document before exporting.';
+        return;
+      }
+      const blob = new Blob([JSON.stringify(state.document, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      const docId = state.document.document.id || 'document';
+      link.href = url;
+      link.download = `${docId}-vetted.json`;
+      link.click();
+      URL.revokeObjectURL(url);
+    }
+
+    bindEvents();
+  </script>
+</body>
+</html>

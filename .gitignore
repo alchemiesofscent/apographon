@@ -113,7 +113,8 @@ Thumbs.db
 .pytest_cache/
 
 # local data outputs (keep raw data tracked)
-data/processed/
+data/processed/*
+!data/processed/README.md
 
 # generated EPUB/css build artifacts
 *.epub
@@ -121,3 +122,9 @@ data/processed/
 
 # logs
 *.log
+out/
+
+# Codex CLI
+.codex/
+.config/codex/
+.env

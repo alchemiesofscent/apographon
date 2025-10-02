@@ -1,8 +1,9 @@
 class MultilingualReader {
-  constructor({ containerId, tocListId, dataUrl }) {
+  constructor({ containerId, tocListId, dataUrl, pageOffset = 0 }) {
     this.container = document.getElementById(containerId);
     this.tocList = document.getElementById(tocListId);
     this.dataUrl = dataUrl;
+    this.pageOffset = typeof pageOffset === 'number' ? pageOffset : 0;
 
     this.settingsKey = 'apographon:reader:settings';
     this.scrollKey = 'apographon:reader:scroll';
@@ -626,7 +627,7 @@ class MultilingualReader {
         if (offset > cursor) {
           fragment.appendChild(document.createTextNode(text.slice(cursor, offset)));
         }
-        fragment.appendChild(this.createPageBreakMarker(page));
+        fragment.appendChild(this.createPageBreakMarker(this.applyPageOffset(page)));
         cursor = offset;
       } else {
         fragment.appendChild(document.createTextNode(text.slice(cursor, end)));
@@ -656,9 +657,17 @@ class MultilingualReader {
       return null;
     }
 
+    const adjustedPages = pages
+      .map((page) => this.applyPageOffset(page))
+      .filter((page) => typeof page === 'number');
+
+    if (!adjustedPages.length) {
+      return null;
+    }
+
     const span = document.createElement('span');
     span.className = 'page-banner';
-    span.textContent = this.formatPageRange(pages);
+    span.textContent = this.formatPageRange(adjustedPages);
     return span;
   }
 
@@ -675,6 +684,13 @@ class MultilingualReader {
       return `Page ${first}`;
     }
     return `Pages ${first}–${last}`;
+  }
+
+  applyPageOffset(page) {
+    if (typeof page !== 'number' || Number.isNaN(page)) {
+      return page;
+    }
+    return page + this.pageOffset;
   }
 
   computeTranslationVisibility(paragraph, state = {}) {
