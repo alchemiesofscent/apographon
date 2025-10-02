@@ -1,7 +1,7 @@
 [tool]
 name = "apographon"
 version = "0.1.0"
-description = "A project to convert a 19th-century German academic book from HTML to reflowable EPUB and TEI XML."
+description = "A project to convert a 19th-century German academic book from HTML to TEI XML and a static reader."
 authors = ["Your Name <your.email@example.com>"]
 license = "MIT"
 
@@ -15,7 +15,6 @@ version = "0.1.0"
 dependencies = [
     "beautifulsoup4",
     "lxml",
-    "pypandoc",
     "click",
     "pytest",
 ]

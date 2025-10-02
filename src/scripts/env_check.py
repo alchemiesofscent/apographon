@@ -11,8 +11,8 @@ def check_dependency(command):
 
 def main():
     dependencies = {
-        'pandoc': 'Pandoc is required for converting documents.',
         'python3': 'Python 3 is required to run this project.',
+        'xmllint': 'xmllint validates TEI output and powers the validation script.',
     }
 
     missing_dependencies = []

@@ -4,7 +4,7 @@ from apographon.converter import GermanBookConverter
 
 def main():
     parser = argparse.ArgumentParser(
-        description="Convert a 19th-century German academic book from HTML to EPUB and TEI XML."
+        description="Convert a 19th-century German academic book from HTML to TEI XML."
     )
     parser.add_argument("--input", dest="input_file", required=True, help="Path to the input HTML file.")
     parser.add_argument(
@@ -12,11 +12,6 @@ def main():
         dest="output_dir",
         default="data/processed",
         help="Directory to store the output files.",
-    )
-    parser.add_argument(
-        "--skip-epub",
-        action="store_true",
-        help="Skip EPUB generation (useful if Pandoc is unavailable).",
     )
     parser.add_argument(
         "--with-viewer",
@@ -48,8 +43,6 @@ def main():
     converter = GermanBookConverter(args.input_file, args.output_dir, metadata=metadata or None)
     converter.clean_html()
     converter.generate_tei()
-    if not args.skip_epub:
-        converter.generate_epub()
     if args.with_viewer:
         converter.emit_viewer()
 
