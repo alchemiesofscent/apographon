@@ -18,10 +18,5 @@ class TestConverter(unittest.TestCase):
         self.assertIn("<teiHeader>", tei_output)
         self.assertIn("<title>Title</title>", tei_output)
 
-    def test_convert_to_epub(self):
-        cleaned_html = "<html><body><h1>Title</h1><p>Content</p></body></html>"
-        epub_output = self.converter.convert_to_epub(cleaned_html)
-        self.assertIn("EPUB", epub_output)
-
 if __name__ == '__main__':
     unittest.main()

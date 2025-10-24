@@ -1,113 +1,63 @@
 # Usage Documentation for Apographon
 
 ## Overview
-
-Apographon is a Python-based tool designed to convert 19th-century German academic books from HTML format into reflowable EPUB and TEI XML documents. This document provides instructions on how to install the necessary dependencies, run the conversion process, and utilize the features of the project.
+Apographon converts 19th-century German academic HTML into a cleaned HTML surrogate, rich TEI XML, and an optional static reader. This guide explains how to install dependencies, run the command-line interface, and validate the generated outputs.
 
 ## Installation
-
-1. **Clone the repository:**
-
+1. **Clone the repository**
    ```bash
    git clone <repository-url>
    cd apographon
    ```
-
-2. **Set up a virtual environment (optional but recommended):**
-
+2. **Create a virtual environment (recommended)**
    ```bash
-   python -m venv venv
-   source venv/bin/activate  # On Windows use `venv\Scripts\activate`
+   python -m venv .venv
+   source .venv/bin/activate  # On Windows use `.venv\Scripts\activate`
    ```
-
-3. **Install the required packages:**
-
+3. **Install Python dependencies**
    ```bash
    pip install -r requirements.txt
    ```
-
-4. **Ensure Pandoc is installed:**
-
-   The project relies on Pandoc for document conversion. You can download it from [Pandoc's official website](https://pandoc.org/installing.html).
+4. **Install XML tooling (optional but useful)**
+   - `xmllint` validates TEI output: `sudo apt install -y libxml2-utils`
 
 ## Usage
-
 ### Command-Line Interface
-
-The project provides a command-line interface to facilitate the conversion process. You can run the conversion using the following command:
-
+Run the converter directly via the CLI module:
 ```bash
 python -m apographon.cli --input data/raw/example.html --output data/processed
 ```
-
 ### Options
+- `--input`: Path to the source HTML file (defaults to `data/raw/example.html`).
+- `--output`: Directory for cleaned HTML and TEI results (defaults to `data/processed`).
+- `--with-viewer`: Copy a minimal static reader and emit `viewer.html`/`view.html` next to the TEI.
+- Metadata flags (optional): `--meta-title`, `--meta-author`, `--meta-date`, `--meta-publisher`, `--meta-place`, `--meta-series`, `--meta-citation`.
 
-- `--input`: Specify the path to the input HTML file (default: `data/raw/example.html`).
-- `--output`: Specify the directory where the processed files will be saved (default: `data/processed`).
-- `--format`: Choose the output format (`epub` or `tei`). If not specified, both formats will be generated.
+### Example Output
+Running the command above produces:
+- `cleaned.html`: Normalized HTML produced by the cleaning pass.
+- `output.xml`: TEI XML enriched with metadata, references, and structured notes.
+- Optional viewer assets when `--with-viewer` is supplied (`viewer/`, `viewer.html`, `view.html`, `tei-viewer.xsl`).
 
-### Example
-
-To convert the example HTML file to both EPUB and TEI formats, run:
-
-```bash
-python -m apographon.cli --input data/raw/example.html --output data/processed
-```
-
-This command will generate the following files in the `data/processed` directory:
-
-- `example.epub`: The reflowable EPUB version of the book.
-- `example.xml`: The TEI XML document.
-
-## Scripts
-
-The project includes several scripts to assist with specific tasks:
-
-- **Build EPUB:** To build the EPUB file using the cleaned HTML and Pandoc, run:
-
-  ```bash
-  ./scripts/build_epub.sh
-  ```
-
-- **Validate TEI:** To validate the generated TEI XML file against the TEI schema, run:
-
-  ```bash
-  ./scripts/validate_tei.sh
-  ```
+## Scripts and Make Targets
+- `make validate_tei`: Run the TEI validation wrapper (`scripts/validate_tei.sh`).
+- `make glossary-compact`: Refresh glossary decision and compiled files for downstream translation workflows.
 
 ## Testing
-
-To run the tests for the converter and TEI generation, use:
-
+Execute the unit suite with:
 ```bash
 pytest tests/
 ```
+Target specific tests during development with `pytest tests/test_converter.py -k <keyword>`.
 
-## Conclusion
-
-Apographon provides a streamlined process for converting historical texts into modern formats. For further assistance, please refer to the README.md file or the source code documentation.
-
-## Viewer and TEI metadata
-
-To emit a minimal web viewer alongside outputs and pre-populate TEI header metadata:
-
-```
-apographon \
+## Viewer and TEI Metadata
+To emit the static reader and populate common TEI metadata fields in one run:
+```bash
+python -m apographon.cli \
   --input data/raw/wellmann.html \
   --output data/processed_out \
-  --skip-epub \
   --with-viewer \
   --meta-citation "Wellmann, M. (1895), Die pneumatische Schule bis auf Archigenes, Philologische Untersuchungen, Weidmannsche Buchhandlung." \
   --meta-place Berlin
 ```
-
-Open the viewer:
-
-- File-based (no server): open `data/processed_out/view.html` in a browser.
-- Local server: `python -m http.server -d data/processed_out 8000` and open `http://localhost:8000/viewer.html`.
-
-Metadata flags (all optional): `--meta-title`, `--meta-author`, `--meta-date`, `--meta-publisher`, `--meta-place`, `--meta-series`, `--meta-citation`.
-
-TEI in-browser:
-
-- When you pass `--with-viewer`, the converter also copies an XSL stylesheet `tei-viewer.xsl` next to `output.xml` and links it via an XML stylesheet PI. You can open `data/processed_out/output.xml` directly in a modern browser to view the TEI with the same layout, page-break HUD, TOC, and footnotes side panel/inline toggle.
+Open the viewer by loading `data/processed_out/view.html` in a browser, or serve the folder with `python -m http.server -d data/processed_out 8000` and visit `http://localhost:8000/viewer.html`. When `tei-viewer.xsl` is copied alongside `output.xml`, modern browsers can render the TEI directly.

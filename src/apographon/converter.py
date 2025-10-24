@@ -1,5 +1,3 @@
-import os
-import subprocess
 import shutil
 from pathlib import Path
 from bs4 import BeautifulSoup
@@ -12,7 +10,6 @@ class GermanBookConverter:
         self.output_dir.mkdir(parents=True, exist_ok=True)
         self.cleaned_html = self.output_dir / 'cleaned.html'
         self.tei_output = self.output_dir / 'output.xml'
-        self.epub_output = self.output_dir / 'output.epub'
         self.metadata = metadata or None
 
     def clean_html(self):
@@ -27,20 +24,9 @@ class GermanBookConverter:
         tei_gen = TEIGenerator(str(self.cleaned_html), self.tei_output, metadata=self.metadata)
         tei_gen.generate_tei(self.tei_output)
 
-    def generate_epub(self):
-        # Optional: generate EPUB via Pandoc (if available)
-        try:
-            from .epub_generator import EpubGenerator
-        except Exception:
-            return
-        metadata_yaml = Path('templates/pandoc/epub_metadata.yaml')
-        epub_gen = EpubGenerator(str(self.cleaned_html), str(self.epub_output), str(metadata_yaml))
-        epub_gen.generate_epub()
-
     def convert(self):
         self.clean_html()
         self.generate_tei()
-        self.generate_epub()
 
     def emit_viewer(self):
         """Copy the static viewer and generate convenient HTML entry points.
@@ -197,9 +183,6 @@ class Converter:
         ).format(title)
         return tei
 
-    def convert_to_epub(self, cleaned_html: str) -> str:
-        # The tests only assert that the returned string mentions "EPUB".
-        return "EPUB generated"
 
 
 if __name__ == "__main__":

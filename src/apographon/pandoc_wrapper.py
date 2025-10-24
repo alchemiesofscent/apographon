@@ -16,11 +16,6 @@ class PandocWrapper:
             print(f"Error during conversion: {e}")
             raise
 
-    def convert_to_epub(self):
-        self.format = 'epub'
-        self.output_file = os.path.splitext(self.input_file)[0] + '.epub'
-        self.convert()
-
     def convert_to_tei(self):
         self.format = 'tei'
         self.output_file = os.path.splitext(self.input_file)[0] + '.xml'

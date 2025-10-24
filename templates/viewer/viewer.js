@@ -219,6 +219,8 @@
     // Rebuild content from original snapshot to keep operations reversible
     el.content.innerHTML = originalHTML;
     ensurePbIds(el.content);
+    // Ensure the TOC container is marked open before building it so the sidebar renders immediately.
+    document.documentElement.classList.add('toc-open');
     // Flow paragraphs across page breaks if page breaks are disabled
     if (el.togglePb && !el.togglePb.checked) {
       mergeParagraphsAcrossPagebreaks(el.content);
@@ -233,8 +235,6 @@
     setupFootnotes();
     linkifyIndices(el.content);
     applyToggles();
-    // Open TOC by default
-    document.documentElement.classList.add('toc-open');
   }
 
   function setIndexSectionsSingleColumn(container, enable) {
@@ -315,8 +315,11 @@
   // TOC toggle button
   el.toggleToc && el.toggleToc.addEventListener('click', () => {
     root.classList.toggle('toc-open');
-    // Ensure TOC exists and is built
-    if (el.toc && !el.toc.children.length) buildTOC();
+    if (!el.toc) return;
+    // Ensure TOC visibility reflects the toggled state.
+    el.toc.style.display = root.classList.contains('toc-open') ? 'block' : 'none';
+    // Build TOC if it has not been generated yet (e.g., in file mode load failures).
+    if (!el.toc.children.length) buildTOC();
   });
 
   // Autoload via ?src=… or default

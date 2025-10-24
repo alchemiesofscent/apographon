@@ -1,0 +1,78 @@
+{
+  "document": {
+    "id": "doc-wellmann-sample",
+    "title": "Die Pneumatische Schule bis auf Archigenes (Sample)",
+    "metadata": {
+      "author": "Max Wellmann",
+      "date": "1895",
+      "translator": "translator-agent-v1",
+      "vetted_by": ""
+    },
+    "paragraphs": [
+      {
+        "id": "p1",
+        "original": {
+          "lang": "de",
+          "text": "Aus der Schule des Asklepiades ist der Arzt hervorgegangen, der durch Popularisierung der Theorieen seines Lehrers der Begründer der methodischen Schule wurde, Themison aus Laodicea. Die große Zahl der Anhänger¹ dieser Schule spricht für den Beifall, den ihre straffe Systematik gefunden hat. Der bekannteste Vertreter ist Thessalos aus Tralles, ein Schüler des Themison aus neronischer Zeit, ein Arzt von schamloser Selbstsucht und marktschreierischer Großthuerei, der mit Unrecht für die Folgezeit der typische Vertreter dieser Schule geworden ist.",
+          "notes": [
+            {
+              "id": "page-13-note-1",
+              "marker": "¹",
+              "text": "Ich nenne von den Schülern des Themison: Meges aus Sidon (schol. Oribas. III 688, 17. Gal. X 454. Cels. V 28, 7 u. öfter), Eudemos (Cael. Aur. A. M. II 38 u. öfter), Proculus (Cael. Aur. M. Ch. III 8. Er ist identisch mit dem von Galen erwähnten Methodiker Proclos: Gal. X 52. XIV 684. Oribas. V 130. Vgl. Grotefend, Die Stempel der röm. Augenärzte. Hannover 1867 u. 83. 84, dessen Bedenken gegen die Identität unbegründet sind) und Menemachos aus Aphrodisias (Gal., a. a. O. Da Celsus bereits ein Zahnmittel von ihm anführt VI 9, 247 D., so muß er ebenfalls Schüler des Themison gewesen sein. Als solcher giebt er sich dadurch zu erkennen, daß er genaue Vorschriften über die zuerst von seinem Lehrer verwandten Blutegel gegeben hat: Orib. II 72. Vgl. II 417 f.). Ferner Dionysios (Gal. X 52. XIV 684), Mnaseas (er gehört schon der zweiten Hälfte des 1. Jahrh. an. Soran benutzte ihn: Cael. Aur. M. Ch. II 7. περὶ γυν. παθ. I 6, 27. 29 R. Andrerseits ist er jünger als Dionysios: Sor. a. a. O.). Antipatros, Olympikos aus Milet und Apollonides aus Cypern (Gal., a. a. O.).",
+              "translation": "I enumerate the pupils of Themison: Meges of Sidon (Scholia on Oribasius III 688, 17; Galen X 454; Celsus V 28, 7 and elsewhere), Eudemos (Caelius Aurelianus Acute Diseases II 38 and elsewhere), Proculus (Caelius Aurelianus Chronic Diseases III 8. He is identical with the Methodic Proclus mentioned by Galen: Galen X 52; XIV 684; Oribasius V 130. Compare Grotefend, The Seals of the Roman Oculists, Hanover 1867, pp. 83–84, whose doubts about the identification are unfounded), and Menemachos of Aphrodisias (Galen, loc. cit. Since Celsus already cites a dental remedy from him VI 9, 247 D, he too must have been a pupil of Themison. He shows this by providing precise instructions for leeches first used by his teacher: Oribasius II 72; compare II 417f.). Further: Dionysios (Galen X 52; XIV 684), Mnaseas (he belongs to the second half of the first century. Soranus used him: Caelius Aurelianus Chronic Diseases II 7; Gynecology I 6, 27, 29 R. Conversely, he is younger than Dionysios: Soranus, loc. cit.), Antipatros, Olympikos of Miletus, and Apollonides of Cyprus (Galen, loc. cit.)."
+            }
+          ]
+        },
+        "translation": {
+          "lang": "en",
+          "text": "From the school of Asclepiades emerged the physician who, by popularizing his teacher’s theories, became the founder of the Methodic school, Themison of Laodicea. The large number of adherents¹ this school attracted attests to the approval earned by its rigorous system. Its best-known representative is Thessalus of Tralles, a student of Themison in the Neronian era, a physician of shameless self-interest and loudmouthed grandstanding, who unjustly became the typical representative of the school for later generations.",
+          "translator": "translator-agent-v1",
+          "vetted_by": "",
+          "confidence": "pending_review",
+          "show_by_default": true,
+          "vetting_notes": "",
+          "vetting_date": "",
+          "timestamp": "2024-01-01T00:00:00Z"
+        }
+      },
+      {
+        "id": "p2",
+        "original": {
+          "lang": "la",
+          "text": "Eius (sc. carbunculi) hae notae sunt: rubor est superque eum non nimium pusulae eminent, maxime nigrae, interdum sublividae aut pallidae .... somnus urget; nonnumquam horror aut febris oritur aut utrumque .... circumque exiguae pusulae oriuntur: et si circa stomachum faucesve incidit, subito spiritum saepe elidit.",
+          "notes": []
+        },
+        "translation": {
+          "lang": "en",
+          "text": "These are the signs of the carbuncle: there is redness, and on it small pustules rise, mostly black, sometimes bluish or pale.... sleep presses down; now and then a chill or a fever arises, or both.... tiny pustules appear around the area; and if it lodges about the stomach or the throat, it very often suddenly cuts off the breath.",
+          "translator": "translator-agent-v1",
+          "vetted_by": "",
+          "confidence": "pending_review",
+          "show_by_default": true,
+          "vetting_notes": "",
+          "vetting_date": "",
+          "timestamp": "2024-01-01T00:05:00Z"
+        }
+      },
+      {
+        "id": "p3",
+        "original": {
+          "lang": "grc",
+          "text": "Καιτοὶ σχεδὸν οὐδείς τῶν νεωτέρων ἰατρῶν οὕτως ἅπαντα τὸν κατὰ τὴν ἰατρικὴν τέχνην ἐξειργάσατο λόγον ὡς Ἀθηναῖος.",
+          "notes": []
+        },
+        "translation": {
+          "lang": "en",
+          "text": "Yet scarcely any of the younger physicians has elaborated the entire discourse of the medical art as thoroughly as Athenaeus.",
+          "translator": "translator-agent-v1",
+          "vetted_by": "",
+          "confidence": "pending_review",
+          "show_by_default": false,
+          "vetting_notes": "",
+          "vetting_date": "",
+          "timestamp": "2024-01-01T00:10:00Z"
+        }
+      }
+    ]
+  }
+}
